@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DialoGPT AI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="chat-container">
+        <header class="chat-header">
+            <div class="header-info">
+                <h2><i class="fas fa-robot"></i> AI Assistant</h2>
+                <p>Powered by DialoGPT & Hugging Face</p>
+            </div>
+            <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+        </header>
+
+        <main class="chat-box" id="chat-box">
+            <!-- Messages will be appended here -->
+            <div class="message bot-message">
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="text">Hello! I am your AI assistant powered by DialoGPT. How can I help you today?</div>
+            </div>
+        </main>
+
+        <form class="chat-input-area" id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off" required>
+            <button type="submit" id="send-btn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
