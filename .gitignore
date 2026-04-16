@@ -28,3 +28,9 @@ instance/
 .idea/
 *.swp
 *.swo
+
+# ML / AI Models (VERY IMPORTANT)
+fine_tuned_model/
+fine_tuned_model_backup/
+*.bin
+*.safetensors
