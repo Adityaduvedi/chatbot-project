@@ -1,0 +1,286 @@
+[
+  {
+    "context": "What is Python used for",
+    "response": "Python is used for web development, data analysis, AI, and automation."
+  },
+  {
+    "context": "What is Java used for",
+    "response": "Java is used to build enterprise applications, mobile apps, and backend systems."
+  },
+  {
+    "context": "What is HTML used for",
+    "response": "HTML is used to structure content on web pages."
+  },
+  {
+    "context": "What is CSS used for",
+    "response": "CSS is used to style and layout web pages."
+  },
+  {
+    "context": "What is JavaScript used for",
+    "response": "JavaScript is used to create interactive web pages."
+  },
+  {
+    "context": "What is full form of CPU",
+    "response": "CPU stands for Central Processing Unit."
+  },
+  {
+    "context": "What is full form of RAM",
+    "response": "RAM stands for Random Access Memory."
+  },
+  {
+    "context": "What is full form of URL",
+    "response": "URL stands for Uniform Resource Locator."
+  },
+  {
+    "context": "What is full form of HTTP",
+    "response": "HTTP stands for HyperText Transfer Protocol."
+  },
+  {
+    "context": "What is programming",
+    "response": "Programming is the process of writing instructions for computers."
+  },
+  {
+    "context": "What is coding",
+    "response": "Coding is the act of writing computer programs."
+  },
+  {
+    "context": "What is software engineering",
+    "response": "Software engineering is the discipline of designing and developing software."
+  },
+  {
+    "context": "What is web development",
+    "response": "Web development is the process of building websites and web applications."
+  },
+  {
+    "context": "What is frontend development",
+    "response": "Frontend development focuses on the user interface of applications."
+  },
+  {
+    "context": "What is backend development",
+    "response": "Backend development handles server logic and database operations."
+  },
+  {
+    "context": "What is server",
+    "response": "A server is a system that provides services to other computers."
+  },
+  {
+    "context": "What is client",
+    "response": "A client is a device or program that requests services from a server."
+  },
+  {
+    "context": "What is browser",
+    "response": "A browser is a software used to access websites."
+  },
+  {
+    "context": "What is Chrome",
+    "response": "Chrome is a web browser developed by Google."
+  },
+  {
+    "context": "What is Python library",
+    "response": "A Python library is a collection of pre-written code for specific tasks."
+  },
+  {
+    "context": "What is framework",
+    "response": "A framework provides a structure for building applications."
+  },
+  {
+    "context": "What is Django",
+    "response": "Django is a Python framework used for web development."
+  },
+  {
+    "context": "What is Flask",
+    "response": "Flask is a lightweight Python web framework."
+  },
+  {
+    "context": "What is JSON",
+    "response": "JSON is a format used to store and exchange data."
+  },
+  {
+    "context": "What is XML",
+    "response": "XML is a markup language used to store data."
+  },
+  {
+    "context": "What is API endpoint",
+    "response": "An API endpoint is a URL where API requests are sent."
+  },
+  {
+    "context": "What is REST API",
+    "response": "REST API is a web service that follows REST principles."
+  },
+  {
+    "context": "What is authentication",
+    "response": "Authentication verifies the identity of a user."
+  },
+  {
+    "context": "What is authorization",
+    "response": "Authorization determines access rights of a user."
+  },
+  {
+    "context": "What is encryption",
+    "response": "Encryption protects data by converting it into unreadable form."
+  },
+  {
+    "context": "What is cybersecurity",
+    "response": "Cybersecurity protects systems from digital attacks."
+  },
+  {
+    "context": "What is data",
+    "response": "Data is information processed or stored by a computer."
+  },
+  {
+    "context": "What is big data",
+    "response": "Big data refers to large and complex datasets."
+  },
+  {
+    "context": "What is cloud",
+    "response": "Cloud refers to remote servers used to store data and run applications."
+  },
+  {
+    "context": "What is AWS",
+    "response": "AWS is a cloud computing platform by Amazon."
+  },
+  {
+    "context": "What is debugging in programming",
+    "response": "Debugging is fixing errors in a program."
+  },
+  {
+    "context": "What is error in programming",
+    "response": "An error is a mistake that causes incorrect results."
+  },
+  {
+    "context": "What is syntax error",
+    "response": "A syntax error occurs when code violates language rules."
+  },
+  {
+    "context": "What is runtime error",
+    "response": "A runtime error occurs while the program is running."
+  },
+  {
+    "context": "What is IDE",
+    "response": "IDE is a software used for coding and development."
+  },
+  {
+    "context": "What is VS Code",
+    "response": "VS Code is a popular code editor."
+  },
+  {
+    "context": "What is open source",
+    "response": "Open source software has publicly available source code."
+  },
+  {
+    "context": "What is closed source",
+    "response": "Closed source software does not share its source code."
+  },
+  {
+    "context": "What is version control",
+    "response": "Version control tracks changes in code."
+  },
+  {
+    "context": "What is branch in git",
+    "response": "A branch is a separate version of code."
+  },
+  {
+    "context": "What is merge in git",
+    "response": "Merging combines changes from different branches."
+  },
+  {
+    "context": "What is commit",
+    "response": "A commit saves changes in version control."
+  },
+  {
+    "context": "What is loop",
+    "response": "A loop repeats a block of code."
+  },
+  {
+    "context": "What is for loop",
+    "response": "A for loop iterates over a sequence."
+  },
+  {
+    "context": "What is while loop",
+    "response": "A while loop runs as long as a condition is true."
+  },
+  {
+    "context": "What is condition",
+    "response": "A condition is a logical expression that returns true or false."
+  },
+  {
+    "context": "What is boolean",
+    "response": "Boolean represents true or false values."
+  },
+  {
+    "context": "What is integer",
+    "response": "Integer is a whole number."
+  },
+  {
+    "context": "What is string",
+    "response": "A string is a sequence of characters."
+  },
+  {
+    "context": "What is array",
+    "response": "An array stores multiple values in one variable."
+  },
+  {
+    "context": "What is list in python",
+    "response": "A list is a collection of items in Python."
+  },
+  {
+    "context": "What is tuple",
+    "response": "A tuple is an immutable collection of items."
+  },
+  {
+    "context": "What is dictionary",
+    "response": "A dictionary stores data as key-value pairs."
+  },
+  {
+    "context": "What is set",
+    "response": "A set is a collection of unique elements."
+  },
+  {
+    "context": "What is exception handling",
+    "response": "Exception handling manages errors in programs."
+  },
+  {
+    "context": "What is try catch",
+    "response": "Try catch handles exceptions in code."
+  },
+  {
+    "context": "What is recursion",
+    "response": "Recursion is a function calling itself."
+  },
+  {
+    "context": "What is stack",
+    "response": "Stack is a data structure that follows LIFO."
+  },
+  {
+    "context": "What is queue",
+    "response": "Queue is a data structure that follows FIFO."
+  },
+  {
+    "context": "What is linked list",
+    "response": "A linked list is a collection of nodes."
+  },
+  {
+    "context": "What is binary tree",
+    "response": "A binary tree is a tree data structure with two children."
+  },
+  {
+    "context": "What is graph",
+    "response": "A graph is a collection of nodes and edges."
+  },
+  {
+    "context": "What is sorting",
+    "response": "Sorting arranges data in order."
+  },
+  {
+    "context": "What is searching",
+    "response": "Searching finds a specific value in data."
+  },
+  {
+    "context": "What is linear search",
+    "response": "Linear search checks each element one by one."
+  },
+  {
+    "context": "What is binary search",
+    "response": "Binary search finds elements in sorted data."
+  }
+]
