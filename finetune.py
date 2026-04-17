@@ -44,7 +44,8 @@ def main():
             inputs.append(dialogue)
             
         model_inputs = tokenizer(inputs, padding="max_length", truncation=True, max_length=128)
-        model_inputs["labels"] = model_inputs["input_ids"].copy()
+        labels = model_inputs["input_ids"].copy()
+        model_inputs["labels"] = labels
         
         return model_inputs
 
@@ -60,7 +61,7 @@ def main():
         per_device_train_batch_size=2, # Keep low to prevent Out Of Memory on local GPUs
         save_steps=500,
         save_total_limit=2,
-        logging_steps=1,
+        logging_steps=10,
         learning_rate=5e-5,
         optim="adamw_torch",
         report_to="none"             # Disable wandb and other external MLops tools

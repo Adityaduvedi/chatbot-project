@@ -42,6 +42,8 @@ def transform_query(query):
     q = query.lower()
 
     # 🔥 Force better search queries
+    if "capital of" in q:
+        return q.replace("what is the", "").replace("what is", "").strip()
     if "prime minister of india" in q:
         return "Narendra Modi"
 
@@ -76,14 +78,20 @@ def get_wikipedia_answer(query):
             return None
 
         for title in results[:5]:
-
             # 🔥 Skip useless pages
             if any(word in title.lower() for word in ["office", "list", "ministry", "department"]):
                 continue
 
             try:
                 summary = wikipedia.summary(title, sentences=1, auto_suggest=False)
-                return summary.strip()
+                
+                # Clean text
+                summary = re.sub(r'(?i)wikipedia', '', summary).strip()
+                
+                # Extract first sentence safely
+                sentences = re.split(r'(?<=[.!?])\s+', summary)
+                return sentences[0] if sentences else summary
+
             except:
                 continue
 
@@ -121,37 +129,47 @@ def generate_dialogpt_response(user_input):
 
     return response.strip()
 
+# ===================== INTENT DETECTION =====================
+
+def detect_intent(user_input):
+    user_lower = user_input.lower().strip()
+    
+    if user_lower in ["hi", "hello", "hey", "sup"] or user_lower.startswith("how are you"):
+        return "greeting"
+        
+    if any(q in user_lower for q in ["who is", "who was", "who invented", "who discovered", "who wrote", "president of", "prime minister of", "ceo of", "founder of", "pm of", "leader of"]):
+        return "person"
+        
+    if any(q in user_lower for q in ["what is", "what are", "define", "explain", "capital of", "tell me about"]):
+        return "factual"
+        
+    return "conversation"
+
 # ===================== MAIN ROUTER =====================
 
 def generate_response(user_input):
     global chat_history_ids
 
-    user_lower = user_input.lower().strip()
+    intent = detect_intent(user_input)
 
-    # Instant replies
-    if user_lower in ["hi", "hello", "hey"]:
+    # Greeting
+    if intent == "greeting":
+        if "how are you" in user_input.lower():
+            return "I'm doing great! How can I assist you?"
         return "Hello! How can I help you today?"
-    if user_lower in ["how are you", "how are you doing"]:
-        return "I'm doing great! How can I assist you?"
 
-    # Knowledge detection
-    knowledge_keywords = [
-        "what is", "who is", "define", "explain",
-        "capital of", "prime minister of", "president of",
-        "invented", "discovered"
-    ]
-
-    if any(k in user_lower for k in knowledge_keywords):
+    # Wikipedia Routing
+    if intent in ["person", "factual"]:
         answer = get_wikipedia_answer(user_input)
         if answer:
             chat_history_ids = None
             return answer
 
-    # Fallback to DialoGPT
+    # Fallback / Conversation
     response = generate_dialogpt_response(user_input)
 
     if len(response.split()) < 3:
-        return "Can you please rephrase that?"
+        return "I'm not sure I understood that clearly. Could you rephrase it?"
 
     return response
 
