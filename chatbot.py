@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 model_name = "microsoft/DialoGPT-medium"
 print(f"Loading conversational model {model_name}...")
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
 tokenizer.pad_token = tokenizer.eos_token
 model = AutoModelForCausalLM.from_pretrained(model_name)
 

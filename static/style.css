@@ -73,6 +73,7 @@ html {
     font-family: var(--font-heading);
     font-size: 1.4rem;
     background: linear-gradient(to right, #e0c3fc, #a634ff);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
