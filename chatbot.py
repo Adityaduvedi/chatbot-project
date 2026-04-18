@@ -21,7 +21,6 @@ chat_history_ids = None
 def clean_query(query):
     query = query.lower().strip()
 
-    # Normalize common abbreviations
     replacements = {
         "pm": "prime minister",
         "usa": "united states",
@@ -31,19 +30,22 @@ def clean_query(query):
     for k, v in replacements.items():
         query = re.sub(rf'\b{k}\b', v, query)
 
-    query = re.sub(r'^(what is|who is|define|explain|tell me about)\s+', '', query)
-    query = query.replace("?", "").strip()
+    query = re.sub(
+        r'^(what is the|what is|what are|who is the|who is|who was|who invented|who discovered|define|explain|tell me about|where is|when was|when did)\s+',
+        '',
+        query
+    )
 
-    return query
+    return query.replace("?", "").strip()
 
 # ===================== TRANSFORM QUERY =====================
 
 def transform_query(query):
     q = query.lower()
 
-    # 🔥 Force better search queries
     if "capital of" in q:
         return q.replace("what is the", "").replace("what is", "").strip()
+
     if "prime minister of india" in q:
         return "Narendra Modi"
 
@@ -77,20 +79,32 @@ def get_wikipedia_answer(query):
         if not results:
             return None
 
+        # 🔥 Exact match priority
+        for title in results:
+            if search_query.lower() in title.lower():
+                try:
+                    summary = wikipedia.summary(title, sentences=1, auto_suggest=False)
+                    summary = re.sub(r'(?i)wikipedia', '', summary)
+                    summary = re.sub(r'\[\d+\]', '', summary)
+                    summary = re.sub(r'\s*\([^)]*\)', '', summary)
+                    return summary.split(".")[0] + "."
+                except:
+                    continue
+
+        # 🔥 Fallback to top results
         for title in results[:5]:
-            # 🔥 Skip useless pages
+
             if any(word in title.lower() for word in ["office", "list", "ministry", "department"]):
                 continue
 
             try:
                 summary = wikipedia.summary(title, sentences=1, auto_suggest=False)
-                
-                # Clean text
-                summary = re.sub(r'(?i)wikipedia', '', summary).strip()
-                
-                # Extract first sentence safely
-                sentences = re.split(r'(?<=[.!?])\s+', summary)
-                return sentences[0] if sentences else summary
+
+                summary = re.sub(r'(?i)wikipedia', '', summary)
+                summary = re.sub(r'\[\d+\]', '', summary)
+                summary = re.sub(r'\s*\([^)]*\)', '', summary)
+
+                return summary.split(".")[0] + "."
 
             except:
                 continue
@@ -127,22 +141,33 @@ def generate_dialogpt_response(user_input):
     new_tokens = chat_history_ids[:, bot_input_ids.shape[-1]:]
     response = tokenizer.decode(new_tokens[0], skip_special_tokens=True)
 
+    # 🔥 Clean weird tokens
+    response = re.sub(r'[^a-zA-Z0-9\s.,?!\'"-]', '', response)
+
     return response.strip()
 
 # ===================== INTENT DETECTION =====================
 
 def detect_intent(user_input):
     user_lower = user_input.lower().strip()
-    
+
     if user_lower in ["hi", "hello", "hey", "sup"] or user_lower.startswith("how are you"):
         return "greeting"
-        
-    if any(q in user_lower for q in ["who is", "who was", "who invented", "who discovered", "who wrote", "president of", "prime minister of", "ceo of", "founder of", "pm of", "leader of"]):
+
+    if any(q in user_lower for q in [
+        "who is", "who was", "who invented", "who discovered", "who wrote",
+        "president of", "prime minister of", "ceo of", "founder of",
+        "pm of", "leader of", "director of", "creator of", "author of"
+    ]):
         return "person"
-        
-    if any(q in user_lower for q in ["what is", "what are", "define", "explain", "capital of", "tell me about"]):
+
+    if any(q in user_lower for q in [
+        "what is", "what are", "define", "explain",
+        "capital", "population", "area", "currency", "language",
+        "tell me about", "where is", "when did", "when was", "how many"
+    ]):
         return "factual"
-        
+
     return "conversation"
 
 # ===================== MAIN ROUTER =====================
@@ -158,18 +183,18 @@ def generate_response(user_input):
             return "I'm doing great! How can I assist you?"
         return "Hello! How can I help you today?"
 
-    # Wikipedia Routing
+    # Wikipedia routing
     if intent in ["person", "factual"]:
         answer = get_wikipedia_answer(user_input)
-        if answer:
+        if answer and len(answer.split()) > 2:
             chat_history_ids = None
             return answer
 
-    # Fallback / Conversation
+    # Fallback to DialoGPT
     response = generate_dialogpt_response(user_input)
 
-    if len(response.split()) < 3:
-        return "I'm not sure I understood that clearly. Could you rephrase it?"
+    if not response or len(response.split()) < 3:
+        return "I'm not sure about that. Can you try asking in a different way?"
 
     return response
 

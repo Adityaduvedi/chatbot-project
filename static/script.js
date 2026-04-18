@@ -1,30 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
+    const typingIndicator = document.getElementById('typing-indicator');
 
-    // Theme toggling
-    themeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-        const isDark = body.classList.contains('dark-mode');
-        themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
-
-    // Helper to scroll to bottom
+    // ===================== SCROLL =====================
     const scrollToBottom = () => {
-        chatBox.scrollTop = chatBox.scrollHeight;
+        chatBox.scrollTo({
+            top: chatBox.scrollHeight,
+            behavior: "smooth"
+        });
     };
 
-    // Add a message to the UI
+    // ===================== ADD MESSAGE =====================
     const addMessage = (text, isUser = false) => {
+
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-        
+
         const avatar = document.createElement('div');
         avatar.className = 'avatar';
-        avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+        avatar.innerHTML = isUser
+            ? '<i class="fas fa-user"></i>'
+            : '<i class="fas fa-robot"></i>';
 
         const textDiv = document.createElement('div');
         textDiv.className = 'text';
@@ -32,39 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         msgDiv.appendChild(avatar);
         msgDiv.appendChild(textDiv);
+
         chatBox.appendChild(msgDiv);
         scrollToBottom();
     };
 
-    // Show typing indicator
-    const showLoading = () => {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message bot-message loading-msg';
-        
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar';
-        avatar.innerHTML = '<i class="fas fa-robot"></i>';
-
-        const textDiv = document.createElement('div');
-        textDiv.className = 'text';
-        textDiv.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-
-        msgDiv.appendChild(avatar);
-        msgDiv.appendChild(textDiv);
-        chatBox.appendChild(msgDiv);
+    // ===================== TYPING =====================
+    const showTyping = () => {
+        typingIndicator.classList.remove('hidden');
         scrollToBottom();
-        
-        return msgDiv;
     };
 
-    // Load history
+    const hideTyping = () => {
+        typingIndicator.classList.add('hidden');
+    };
+
+    // ===================== LOAD HISTORY =====================
     const loadHistory = async () => {
         try {
             const response = await fetch('/history');
             const data = await response.json();
-            
+
             if (data.history && data.history.length > 0) {
-                chatBox.innerHTML = ''; // clear default greeting if there's history
+                chatBox.innerHTML = '';
                 data.history.forEach(item => {
                     addMessage(item.user_message, true);
                     addMessage(item.bot_response, false);
@@ -75,22 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Load history on startup
     loadHistory();
 
-    // Handle form submission
+    // ===================== SUBMIT =====================
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const message = userInput.value.trim();
         if (!message) return;
 
-        // Display user message
+        // Show user message
         addMessage(message, true);
         userInput.value = '';
-        
-        // Show loading indicator
-        const loadingDiv = showLoading();
+
+        // Show typing animation
+        showTyping();
 
         try {
             const response = await fetch('/chat', {
@@ -102,20 +90,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            
-            // Remove loading indicator
-            loadingDiv.remove();
+
+            // Hide typing
+            hideTyping();
 
             if (data.response) {
                 addMessage(data.response, false);
             } else {
-                addMessage('Sorry, I encountered an error.', false);
+                addMessage("Hmm... something went wrong 🤔", false);
             }
-            
+
         } catch (error) {
             console.error('Error:', error);
-            loadingDiv.remove();
-            addMessage('Failed to connect to the server.', false);
+            hideTyping();
+            addMessage("Server not responding 🚫", false);
         }
     });
+
 });
