@@ -1,7 +1,9 @@
 import torch
 import wikipedia
 import re
+import json
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from rapidfuzz import process
 
 # ===================== LOAD MODEL =====================
 
@@ -16,13 +18,26 @@ print("Model loaded successfully.")
 
 chat_history_ids = None
 
-# ===================== CLEAN QUERY =====================
+# ===================== TRANSFORM QUERY =====================
 
-def clean_query(query):
+def transform_query(query):
     query = query.lower().strip()
 
+    # Remove question marks
+    query = query.replace("?", "")
+
+    # Remove question prefixes
+    query = re.sub(
+        r'^(who is the|who is|who was|who invented|who discovered|what is the|what is|what are|define|explain|tell me about|where is|when was|when did)\s+',
+        '',
+        query
+    ).strip()
+
+    # Convert abbreviations
     replacements = {
         "pm": "prime minister",
+        "ceo": "ceo",
+        "founder": "founder",
         "usa": "united states",
         "uk": "united kingdom"
     }
@@ -30,44 +45,7 @@ def clean_query(query):
     for k, v in replacements.items():
         query = re.sub(rf'\b{k}\b', v, query)
 
-    query = re.sub(
-        r'^(what is the|what is|what are|who is the|who is|who was|who invented|who discovered|define|explain|tell me about|where is|when was|when did)\s+',
-        '',
-        query
-    )
-
-    return query.replace("?", "").strip()
-
-# ===================== TRANSFORM QUERY =====================
-
-def transform_query(query):
-    q = query.lower()
-
-    if "capital of" in q:
-        return q.replace("what is the", "").replace("what is", "").strip()
-
-    if "prime minister of india" in q:
-        return "Narendra Modi"
-
-    if "president of india" in q:
-        return "Droupadi Murmu"
-
-    if "invented" in q and "bulb" in q:
-        return "Thomas Edison light bulb"
-
-    if "java" in q:
-        return "Java programming language"
-
-    if "python" in q:
-        return "Python programming language"
-
-    if "cpu" in q:
-        return "Central processing unit"
-
-    if "atm" in q:
-        return "Automated teller machine"
-
-    return clean_query(query)
+    return query.strip()
 
 # ===================== WIKIPEDIA =====================
 
@@ -79,37 +57,26 @@ def get_wikipedia_answer(query):
         if not results:
             return None
 
-        # 🔥 Exact match priority
+        best_title = None
         for title in results:
-            if search_query.lower() in title.lower():
-                try:
-                    summary = wikipedia.summary(title, sentences=1, auto_suggest=False)
-                    summary = re.sub(r'(?i)wikipedia', '', summary)
-                    summary = re.sub(r'\[\d+\]', '', summary)
-                    summary = re.sub(r'\s*\([^)]*\)', '', summary)
-                    return summary.split(".")[0] + "."
-                except:
-                    continue
-
-        # 🔥 Fallback to top results
-        for title in results[:5]:
-
-            if any(word in title.lower() for word in ["office", "list", "ministry", "department"]):
+            title_lower = title.lower()
+            # Skip irrelevant results
+            if any(word in title_lower for word in ["list", "category", "department", "ministry", "office"]):
                 continue
+            best_title = title
+            break
 
-            try:
-                summary = wikipedia.summary(title, sentences=1, auto_suggest=False)
+        if not best_title:
+            return None
 
-                summary = re.sub(r'(?i)wikipedia', '', summary)
-                summary = re.sub(r'\[\d+\]', '', summary)
-                summary = re.sub(r'\s*\([^)]*\)', '', summary)
+        summary = wikipedia.summary(best_title, sentences=1, auto_suggest=False)
 
-                return summary.split(".")[0] + "."
+        # Return ONLY one clean sentence and remove unwanted words like "Wikipedia"
+        summary = re.sub(r'(?i)wikipedia', '', summary)
+        summary = re.sub(r'\[\d+\]', '', summary)
+        summary = re.sub(r'\s*\([^)]*\)', '', summary)
 
-            except:
-                continue
-
-        return None
+        return summary.split(".")[0].strip() + "."
 
     except Exception as e:
         print("Wikipedia error:", e)
@@ -151,37 +118,92 @@ def generate_dialogpt_response(user_input):
 def detect_intent(user_input):
     user_lower = user_input.lower().strip()
 
-    if user_lower in ["hi", "hello", "hey", "sup"] or user_lower.startswith("how are you"):
+    greetings = [
+        "hi", "hello", "hey", "sup", "how are you"
+    ]
+    
+    person_keywords = [
+        "who is", "who was", "who invented", "who discovered",
+        "president", "prime minister", "pm", "ceo", "founder",
+        "leader", "director", "author"
+    ]
+    
+    factual_keywords = [
+        "what is", "define", "explain",
+        "capital", "population", "area", "currency",
+        "language", "where is", "when did", "when was", "how many"
+    ]
+
+    if any(k in user_lower for k in greetings):
         return "greeting"
 
-    if any(q in user_lower for q in [
-        "who is", "who was", "who invented", "who discovered", "who wrote",
-        "president of", "prime minister of", "ceo of", "founder of",
-        "pm of", "leader of", "director of", "creator of", "author of"
-    ]):
+    if any(k in user_lower for k in person_keywords):
         return "person"
 
-    if any(q in user_lower for q in [
-        "what is", "what are", "define", "explain",
-        "capital", "population", "area", "currency", "language",
-        "tell me about", "where is", "when did", "when was", "how many"
-    ]):
+    if any(k in user_lower for k in factual_keywords):
         return "factual"
 
     return "conversation"
 
 # ===================== MAIN ROUTER =====================
 
+def get_custom_answer(query):
+    query_lower = query.lower().strip()
+    
+    if not query_lower.startswith(("what", "define", "explain")):
+        return None
+
+    try:
+        with open("custom_dataset.json", "r", encoding="utf-8") as f:
+            dataset = json.load(f)
+            
+        contexts = [item["context"].lower() for item in dataset]
+        
+        match, score, index = process.extractOne(query_lower, contexts)
+        
+        if score > 85:
+            return dataset[index]["response"]
+            
+    except Exception as e:
+        print("Custom dataset error:", e)
+        
+    return None
+
+def correct_spelling(query):
+    keywords = [
+        "prime minister of india",
+        "president of india",
+        "capital of india",
+        "capital of france",
+        "java programming language",
+        "python programming language",
+        "central processing unit",
+        "automated teller machine"
+    ]
+
+    match, score, _ = process.extractOne(query.lower(), keywords)
+
+    if score > 85:
+        return match
+    return query
+
 def generate_response(user_input):
     global chat_history_ids
 
-    intent = detect_intent(user_input)
+    intent = detect_intent(user_input)   
+    user_input = correct_spelling(user_input)  
 
     # Greeting
     if intent == "greeting":
         if "how are you" in user_input.lower():
             return "I'm doing great! How can I assist you?"
         return "Hello! How can I help you today?"
+
+    # Custom dataset check for factual queries
+    if intent == "factual":
+        custom_answer = get_custom_answer(user_input)
+        if custom_answer:
+            return custom_answer
 
     # Wikipedia routing
     if intent in ["person", "factual"]:
