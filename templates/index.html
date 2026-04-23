@@ -57,6 +57,11 @@
         <div class="input-wrapper">
             <form class="chat-input-area" id="chat-form">
                 <input type="text" id="user-input" placeholder="Type something..." autocomplete="off" required>
+                <!-- VOICE ANIMATION -->
+                <canvas id="voice-canvas" class="voice-canvas hidden"></canvas>
+                <button type="button" id="mic-btn" class="mic-btn" title="Click to speak">
+                    <i class="fa fa-microphone"></i>
+                </button>
                 <button type="submit" id="send-btn" class="send-btn">
                     <i class="fas fa-paper-plane"></i>
                 </button>

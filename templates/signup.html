@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            z-index: 10;
+            position: relative;
+        }
+        .auth-box {
+            background: rgba(10, 10, 15, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--surface-border);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(166, 52, 255, 0.1);
+        }
+        .auth-box h2 {
+            font-family: var(--font-heading);
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #e0c3fc, #a634ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--surface-border);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+        }
+        .auth-form input:focus {
+            border-color: #a634ff;
+        }
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #a634ff 0%, #6a00f4 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .auth-form button:hover {
+            transform: scale(1.02);
+        }
+        .auth-links {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .auth-links a {
+            color: #a634ff;
+            text-decoration: none;
+        }
+        .flash-messages {
+            color: #ff4a4a;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg"></div>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Create Account</h2>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages">
+                {% for message in messages %}
+                  <p>{{ message }}</p>
+                {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            <form class="auth-form" id="signup-form" method="POST" action="/signup">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" id="password-input" name="password" placeholder="Password" required>
+                
+                <ul id="password-rules">
+                    <li id="rule-length" class="invalid">Minimum 8 characters</li>
+                    <li id="rule-uppercase" class="invalid">At least one uppercase letter</li>
+                    <li id="rule-number" class="invalid">At least one number</li>
+                    <li id="rule-special" class="invalid">At least one special character</li>
+                </ul>
+                
+                <button type="submit">Sign Up</button>
+            </form>
+            <div class="auth-links">
+                <p>Already have an account? <a href="/login">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password-input');
+        const signupForm = document.getElementById('signup-form');
+        
+        const rules = {
+            length: { element: document.getElementById('rule-length'), regex: /.{8,}/ },
+            uppercase: { element: document.getElementById('rule-uppercase'), regex: /[A-Z]/ },
+            number: { element: document.getElementById('rule-number'), regex: /[0-9]/ },
+            special: { element: document.getElementById('rule-special'), regex: /[!@#$%^&*(),.?":{}|<>]/ }
+        };
+
+        passwordInput.addEventListener('input', function() {
+            const val = passwordInput.value;
+            
+            for (const key in rules) {
+                const rule = rules[key];
+                if (rule.regex.test(val)) {
+                    rule.element.classList.remove('invalid');
+                    rule.element.classList.add('valid');
+                } else {
+                    rule.element.classList.remove('valid');
+                    rule.element.classList.add('invalid');
+                }
+            }
+        });
+
+        signupForm.addEventListener('submit', function(e) {
+            const val = passwordInput.value;
+            let isValid = true;
+            
+            for (const key in rules) {
+                if (!rules[key].regex.test(val)) {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Password does not meet requirements. Please check the rules in red.');
+            }
+        });
+    </script>
+</body>
+</html>

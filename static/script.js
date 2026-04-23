@@ -107,4 +107,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ===================== SPEECH RECOGNITION & VISUALIZATION =====================
+    const micBtn = document.getElementById('mic-btn');
+    const voiceCanvas = document.getElementById('voice-canvas');
+    const canvasCtx = voiceCanvas ? voiceCanvas.getContext('2d') : null;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    let audioContext;
+    let analyser;
+    let microphone;
+    let animationId;
+
+    if (SpeechRecognition && voiceCanvas) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = "en-US";
+
+        const startVisualization = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                microphone.connect(analyser);
+                analyser.fftSize = 256;
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                const draw = () => {
+                    animationId = requestAnimationFrame(draw);
+                    analyser.getByteFrequencyData(dataArray);
+                    
+                    canvasCtx.clearRect(0, 0, voiceCanvas.width, voiceCanvas.height);
+                    
+                    const barWidth = (voiceCanvas.width / bufferLength) * 2.5;
+                    let x = 0;
+                    
+                    for (let i = 0; i < bufferLength; i++) {
+                        // Scale height to fit canvas
+                        const barHeight = dataArray[i] / 2;
+                        
+                        canvasCtx.fillStyle = '#a634ff';
+                        // Center vertically
+                        const y = (voiceCanvas.height - barHeight) / 2;
+                        canvasCtx.fillRect(x, y, barWidth, barHeight || 2);
+                        
+                        x += barWidth + 2;
+                    }
+                };
+                
+                draw();
+            } catch (err) {
+                console.error("Error accessing microphone for visualization:", err);
+            }
+        };
+
+        const stopVisualization = () => {
+            if (animationId) cancelAnimationFrame(animationId);
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close();
+            }
+        };
+
+        const chatInputArea = document.querySelector('.chat-input-area');
+
+        micBtn.addEventListener('click', () => {
+            micBtn.classList.add('recording');
+            if (chatInputArea) chatInputArea.classList.add('recording');
+            voiceCanvas.classList.remove('hidden');
+            
+            // Set canvas exact dimensions to avoid blur
+            voiceCanvas.width = voiceCanvas.offsetWidth || 300;
+            voiceCanvas.height = voiceCanvas.offsetHeight || 30;
+            
+            startVisualization();
+            recognition.start();
+        });
+
+        recognition.addEventListener('result', (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            
+            // Focus the input field so the user can review/edit
+            userInput.focus();
+        });
+
+        recognition.addEventListener('error', (event) => {
+            console.error('Speech recognition error:', event.error);
+            micBtn.classList.remove('recording');
+            if (chatInputArea) chatInputArea.classList.remove('recording');
+            voiceCanvas.classList.add('hidden');
+            stopVisualization();
+        });
+        
+        recognition.addEventListener('end', () => {
+            micBtn.classList.remove('recording');
+            if (chatInputArea) chatInputArea.classList.remove('recording');
+            voiceCanvas.classList.add('hidden');
+            stopVisualization();
+        });
+    } else {
+        console.warn("Speech Recognition API is not supported in this browser.");
+        if (micBtn) micBtn.style.display = 'none';
+    }
+
 });

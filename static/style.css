@@ -233,6 +233,7 @@ html {
     padding: 6px 10px;
     border-radius: 30px;
     border: 1px solid rgba(166, 52, 255, 0.3);
+    position: relative;
 }
 
 .chat-input-area:focus-within {
@@ -246,6 +247,63 @@ html {
     color: white;
     font-size: 0.9rem;
     outline: none;
+    transition: opacity 0.2s ease;
+}
+
+.chat-input-area.recording #user-input {
+    color: transparent;
+}
+.chat-input-area.recording #user-input::placeholder {
+    color: transparent;
+}
+
+/* Voice Canvas */
+.voice-canvas {
+    position: absolute;
+    left: 14px;
+    right: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 30px;
+    pointer-events: none;
+    display: block;
+    width: calc(100% - 114px);
+}
+
+.voice-canvas.hidden {
+    display: none;
+}
+
+.mic-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--surface-border);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--text-main);
+    margin-right: 8px;
+    transition: 0.2s ease;
+}
+
+.mic-btn:hover {
+    transform: scale(1.1);
+    background: rgba(166, 52, 255, 0.2);
+    border-color: rgba(166, 52, 255, 0.5);
+    color: white;
+}
+
+.mic-btn.recording {
+    background: rgba(255, 50, 50, 0.2);
+    border-color: #ff3232;
+    color: #ff3232;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .send-btn {
@@ -256,8 +314,31 @@ html {
     border-radius: 50%;
     cursor: pointer;
     color: white;
+    transition: 0.2s ease;
 }
 
 .send-btn:hover {
     transform: scale(1.1);
+}
+
+/* Password Validation Rules */
+#password-rules {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+#password-rules li {
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+.valid {
+    color: #4caf50;
+}
+
+.invalid {
+    color: #ff4d4d;
 }
